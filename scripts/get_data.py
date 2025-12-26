@@ -50,3 +50,9 @@ def get_local_csv(filename, sep=','):
     file_path = os.path.join(donnees_path, filename)
     # Charger et retourner le DataFrame
     return pd.read_csv(file_path, sep=sep)
+
+
+def get_pop():
+    df_pop = pd.read_excel("popcommunes.xlsx")
+    df_pop.rename(columns={'codgeo': 'code_commune'}, inplace=True)
+    return df_pop
