@@ -1,6 +1,8 @@
 import os
 import s3fs
 import pandas as pd
+import requests
+from bs4 import BeautifulSoup
 
 
 def get_dvf():

@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+import plotly.express as px
 
 
 def relation_surface_prix(df_sans_lots_tronqué):
@@ -48,3 +49,41 @@ def relation_surface_prix(df_sans_lots_tronqué):
 
     plt.tight_layout()
     plt.show()
+
+
+def top_departements(df):
+    # Calculer les statistiques par département
+    geo_stats = df.groupby(['departement', 'type_local']).size().unstack(fill_value=0)
+    geo_stats['total'] = geo_stats.sum(axis=1)
+    geo_stats['pct_maison'] = (geo_stats['Maison'] / geo_stats['total']) * 100
+    geo_stats['pct_appartement'] = (geo_stats['Appartement'] / geo_stats['total']) * 100
+
+    # Trier par nombre total de ventes
+    geo_stats_sorted = geo_stats.sort_values('total', ascending=False)
+
+    print(f"Statistiques calculées pour {len(geo_stats_sorted)} départements")
+    print("\nTop 10 départements par nombre de ventes :")
+    print(geo_stats_sorted.head(10))
+
+
+def pourcentage_maisons_appartements(geo_stats_with_info):
+    # Visualisation 1 : Graphique en barres empilées avec noms
+    fig1 = px.bar(geo_stats_with_info.head(30), 
+        x='dept_nom', 
+        y=['pct_maison', 'pct_appartement'],
+        title='Répartition Maison vs Appartement par département (Top 30)',
+        labels={'value': 'Pourcentage (%)', 'dept_nom': 'Département'},
+        barmode='stack',
+        height=600,
+        color_discrete_map={'pct_maison': '#2ecc71', 'pct_appartement': '#e74c3c'},
+        hover_data={'densite': ':.0f'})
+
+    fig1.update_layout(
+        xaxis_title='Département',
+        yaxis_title='Pourcentage (%)',
+        legend_title='Type de bien',
+        hovermode='x unified',
+        xaxis_tickangle=-45
+    )
+
+    fig1.show()
