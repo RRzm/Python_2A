@@ -18,3 +18,10 @@ def filtre_donnes_pop(df_pop):
     df_pop[cols].isna().sum()
     lignes_na = df_pop[df_pop[cols].isna().any(axis=1)]
     return lignes_na
+
+
+def enleverchiffreDOMs(code):
+    if len(code) == 6:
+        # retirer le 3ème caractère (index 2)
+        return code[:2] + code[3:]
+    return code
