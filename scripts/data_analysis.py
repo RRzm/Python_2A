@@ -51,16 +51,7 @@ def relation_surface_prix(df_sans_lots_tronqué):
     plt.show()
 
 
-def top_departements(df):
-    # Calculer les statistiques par département
-    geo_stats = df.groupby(['departement', 'type_local']).size().unstack(fill_value=0)
-    geo_stats['total'] = geo_stats.sum(axis=1)
-    geo_stats['pct_maison'] = (geo_stats['Maison'] / geo_stats['total']) * 100
-    geo_stats['pct_appartement'] = (geo_stats['Appartement'] / geo_stats['total']) * 100
-
-    # Trier par nombre total de ventes
-    geo_stats_sorted = geo_stats.sort_values('total', ascending=False)
-
+def top_departements(geo_stats_sorted):
     print(f"Statistiques calculées pour {len(geo_stats_sorted)} départements")
     print("\nTop 10 départements par nombre de ventes :")
     print(geo_stats_sorted.head(10))
@@ -87,3 +78,26 @@ def pourcentage_maisons_appartements(geo_stats_with_info):
     )
 
     fig1.show()
+
+
+def histogramme_densite(geo_stats_with_info):
+    # Visualisation : Type de logement par catégorie de densité
+    # On ne conserve que l'histogramme par catégorie de densité
+    geo_stats_with_info['categorie_densite'] = pd.cut(
+        geo_stats_with_info['densite'],
+        bins=[0, 50, 100, 200, 500, 10000],
+        labels=['Très faible (<50)', 'Faible (50-100)', 'Moyenne (100-200)', 'Élevée (200-500)', 'Très élevée (>500)']
+    )
+
+    cat_stats = geo_stats_with_info.groupby('categorie_densite')[['pct_maison', 'pct_appartement']].mean()
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    cat_stats.plot(kind='bar', ax=ax, color=['#2ecc71', '#e74c3c'], width=0.7)
+    ax.set_xlabel('Catégorie de densité', fontsize=11)
+    ax.set_ylabel('Pourcentage moyen (%)', fontsize=11)
+    ax.set_title('Type de logement par catégorie de densité', fontsize=12, fontweight='bold')
+    ax.legend(['Maison', 'Appartement'])
+    ax.tick_params(axis='x', rotation=30)
+    ax.grid(True, alpha=0.3, axis='y')
+    plt.tight_layout()
+    plt.show()

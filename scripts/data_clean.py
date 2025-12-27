@@ -52,3 +52,30 @@ def troncature_lots(df_sans_lots):
     ]
 
     return df_sans_lots_tronqué
+
+
+###
+
+def prepare_regression_dataset(df, colonnes):
+    """
+    Sélectionne les colonnes nécessaires à la régression
+    et supprime toutes les lignes contenant des valeurs manquantes (NaN).
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame original contenant toutes les variables
+    colonnes : list
+        Liste des noms de colonnes à conserver
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame nettoyé, prêt pour une régression linéaire
+    """
+    # Sélection des colonnes d'intérêt
+    df_selection = df[colonnes].copy()
+    # Suppression des lignes avec au moins une valeur manquante
+    df_clean = df_selection.dropna()
+    # Retourne le DataFrame final
+    return df_clean

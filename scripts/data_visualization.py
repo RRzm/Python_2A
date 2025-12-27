@@ -128,3 +128,31 @@ def surfaces(df_sans_lots):
 
     plt.tight_layout()
     plt.show()
+
+
+def correlation_densite_appartements(geo_stats_with_info):
+    # Visualisation 2 : Relation entre densité et type de logement
+    fig2 = px.scatter(geo_stats_with_info.dropna(subset=['densite']), 
+                    x='densite', 
+                    y='pct_appartement',
+                    size='total',
+                    color='pct_appartement',
+                    hover_name='dept_nom',
+                    hover_data={'Maison': True, 'Appartement': True, 'densite': ':.0f'},
+                    title='Corrélation : Densité de population vs % Appartements',
+                    labels={'densite': 'Densité (hab/km²)', 'pct_appartement': '% Appartements'},
+                    color_continuous_scale='Turbo',  # meilleure lisibilité pour les faibles valeurs
+                    height=600,
+                    size_max=30)
+
+    # Améliorer le contraste visuel des marqueurs
+    fig2.update_traces(marker=dict(opacity=0.9,
+                                line=dict(width=1, color='rgba(0,0,0,0.3)')))
+
+    fig2.update_layout(
+        xaxis_title='Densité de population (habitants/km²)',
+        yaxis_title='Pourcentage d\'Appartements (%)',
+        xaxis_type='log'  # Échelle logarithmique pour mieux voir la distribution
+    )
+
+    fig2.show()
