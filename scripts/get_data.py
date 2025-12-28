@@ -5,24 +5,42 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def get_dvf():
+def get_cloud_csv(filename, sep=","):
     """
-    Charge les données DVF géolocalisées depuis S3 et retourne un DataFrame.
+    Charge un fichier CSV depuis S3 et retourne un DataFrame.
+
+    Paramètres:
+    -----------
+    filename : str
+        Nom du fichier à charger (avec ou sans extension .csv)
+    sep : str, optional
+        Séparateur du fichier CSV (par défaut ",")
+
     Retourne:
     --------
     pd.DataFrame
-        DataFrame contenant les données DVF
+        DataFrame contenant les données du fichier
     Exemple:
     --------
-    df = get_dvf()
+    df = get_cloud_csv("dvf")
+    df = get_cloud_csv("dossier_complet", sep=";")
     """
+    if not filename.endswith(".csv"):
+        filename = f"{filename}.csv"
+
     S3_ENDPOINT_URL = "https://" + os.environ["AWS_S3_ENDPOINT"]
     fs = s3fs.S3FileSystem(
         anon=True,
         client_kwargs={"endpoint_url": S3_ENDPOINT_URL}
     )
-    with fs.open("renan/diffusion/dvf.csv", mode="rb") as f:
-        df = pd.read_csv(f, dtype={'code_commune': "str"})
+
+    with fs.open(f"renan/diffusion/{filename}", mode="rb") as f:
+        df = pd.read_csv(
+            f,
+            sep=sep,
+            dtype={"code_commune": "str"}
+        )
+
     return df
 
 
@@ -58,3 +76,5 @@ def get_pop():
     df_pop = pd.read_excel("popcommunes.xlsx")
     df_pop.rename(columns={'codgeo': 'code_commune'}, inplace=True)
     return df_pop
+
+

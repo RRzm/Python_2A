@@ -20,21 +20,21 @@ def plot_log_ols_regression(model, y, X, title="Régression log-OLS",
     title : str
         Titre du graphique
     remove_outliers : bool
-        Se True, remove valores extremos para melhor visualização
+        Si True, supprime les valeurs extrêmes pour une meilleure visualisation.
     percentile_threshold : float
-        Percentil para considerar outliers (padrão: 99)
+        Pourcentage à prendre en compte pour les valeurs aberrantes (par défaut : 99)
     """
-    # Aligner y e X da mesma forma que na regressão
+    # Aligner y et X de la même manière que dans la régression
     data = pd.concat([y, X], axis=1, join='inner').dropna()
     data = data[data[y.name] > 0]
     y_aligned = data[y.name]
     X_aligned = sm.add_constant(data.drop(columns=[y.name]))
 
-    # Valores ajustados (em escala original)
+    # Valeurs ajustées (à l'échelle originale)
     y_pred_log = model.predict(X_aligned)
     y_pred = np.exp(y_pred_log)
 
-    # Remover outliers para visualização se solicitado
+    # Supprimer les valeurs aberrantes pour la visualisation si demandé
     if remove_outliers:
         threshold_obs = np.percentile(y_aligned, percentile_threshold)
         threshold_pred = np.percentile(y_pred, percentile_threshold)
@@ -55,7 +55,7 @@ def plot_log_ols_regression(model, y, X, title="Régression log-OLS",
     plt.scatter(y_plot, y_pred_plot, color='blue', alpha=0.5, 
                 edgecolors='navy', linewidth=0.5, label='Prédictions')
     
-    # Linha de referência y = y_pred
+    # Ligne de référence y = y_pred
     min_val = min(y_plot.min(), y_pred_plot.min())
     max_val = max(y_plot.max(), y_pred_plot.max())
     plt.plot([min_val, max_val], [min_val, max_val],
@@ -67,7 +67,7 @@ def plot_log_ols_regression(model, y, X, title="Régression log-OLS",
     plt.legend(fontsize=10)
     plt.grid(True, alpha=0.3)
     
-    # Adicionar estatísticas ao gráfico
+    # Ajouter des statistiques au graphique
     r2 = model.rsquared
     plt.text(0.05, 0.95, f'R² = {r2:.4f}', 
              transform=plt.gca().transAxes, 
@@ -77,7 +77,7 @@ def plot_log_ols_regression(model, y, X, title="Régression log-OLS",
     plt.tight_layout()
     plt.show()
     
-    # Retornar informações sobre os dados
+    # Renvoyer des informations sur les données
     return {
         'n_total': len(y_aligned),
         'n_plotted': len(y_plot),
