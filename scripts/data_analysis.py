@@ -109,7 +109,7 @@ def graph_ventes_par_communes(ventes_par_commune):
     top15 = ventes_par_commune.head(15)
 
     plt.figure(figsize=(10,6))
-    sns.barplot(x='nombre', y='code_commune', data=top15, palette='viridis') 
+    sns.barplot(x='nombre', y='nom_commune', data=top15, palette='viridis') 
     plt.title("Top 15 des communes avec le plus de ventes")
     plt.xlabel("Nombre de ventes")
     plt.ylabel("Commune")
