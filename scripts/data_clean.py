@@ -59,7 +59,7 @@ def enleverchiffreDOMs(code):
     return code
 
 
-def troncature_lots(df_sans_lots):
+def troncature_lots(df1):
     """
     Tronque les prix aberrants par commune (méthode robuste).
     
@@ -79,7 +79,7 @@ def troncature_lots(df_sans_lots):
 
     # Calcul des quantiles 0.025 et 0.975 par commune :
     quantiles_par_commune = (
-        df_sans_lots
+        df1
         .groupby('code_commune')['rapport valeur foncière et surface bâtie']
         .quantile([0.025, 0.975])
         .unstack()
@@ -88,18 +88,18 @@ def troncature_lots(df_sans_lots):
     )
 
     # Fusionner les quantiles avec df_sans_lots
-    df_sans_lots_tronqué = df_sans_lots.merge(
+    df2 = df1.merge(
         quantiles_par_commune,
         on='code_commune',
         how='left'
     )
 
-    df_sans_lots_tronqué = df_sans_lots_tronqué[
-        (df_sans_lots_tronqué['rapport valeur foncière et surface bâtie'] >= df_sans_lots_tronqué['quantile_025']) &
-        (df_sans_lots_tronqué['rapport valeur foncière et surface bâtie'] <= df_sans_lots_tronqué['quantile_975'])
+    df2 = df2[
+        (df2['rapport valeur foncière et surface bâtie'] > df2['quantile_025']) &
+        (df2['rapport valeur foncière et surface bâtie'] < df2['quantile_975'])
     ]
 
-    return df_sans_lots_tronqué
+    return df2
 
 
 ###
