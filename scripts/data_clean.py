@@ -1,6 +1,21 @@
 import pandas as pd
 
 def convertir_codes_communes(df):
+    """
+    Convertit les codes communes en string pour éviter les pertes d'information.
+    
+    Certains codes communes (2A, 2B en Corse) ne peuvent pas être convertis en int.
+    
+    Paramètres
+    ----------
+    df : pd.DataFrame
+        DataFrame contenant une colonne 'code_commune'
+    
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame avec 'code_commune' convertie en string
+    """
 
     def inttostr(valeur):
         if isinstance(valeur, float):
@@ -23,6 +38,21 @@ def filtre_donnes_pop(df_pop):
 
 
 def enleverchiffreDOMs(code):
+    """
+    Supprime le 3ème chiffre des codes communes DOM à 6 chiffres.
+    
+    Exemple: '974421' (Réunion) -> '97421' (harmonisation avec DVF)
+    
+    Paramètres
+    ----------
+    code : str
+        Code commune (potentiellement à 6 chiffres)
+    
+    Returns
+    -------
+    str
+        Code commune harmonisé (5 chiffres)
+    """
     if len(code) == 6:
         # retirer le 3ème caractère (index 2)
         return code[:2] + code[3:]
@@ -30,6 +60,22 @@ def enleverchiffreDOMs(code):
 
 
 def troncature_lots(df_sans_lots):
+    """
+    Tronque les prix aberrants par commune (méthode robuste).
+    
+    Calcule les quantiles (2.5% et 97.5%) par commune, puis supprime
+    les valeurs en dehors de cet intervalle pour chaque commune.
+    
+    Paramètres
+    ----------
+    df_sans_lots : pd.DataFrame
+        DataFrame avec colonne 'rapport valeur foncière et surface bâtie'
+    
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame tronqué (outliers supprimés)
+    """
 
     # Calcul des quantiles 0.025 et 0.975 par commune :
     quantiles_par_commune = (
@@ -83,10 +129,7 @@ def prepare_regression_dataset(df, colonnes):
     return df_clean
 
 
-def ajout_non_communes(df_sans_lots):
-    # Chargement de la table code_commune -> nom_commune
-    communes_df = pd.read_csv('liste_communes.csv', dtype={'code_commune': str})
-
+def ajout_non_communes(df_sans_lots, communes_df):
     # Merge avec ton df_sans_lots
     df_sans_lots = df_sans_lots.merge(communes_df[['code_commune', 'nom_commune']],
                                     on='code_commune',
