@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.express as px
+import seaborn as sns
 
 
 def relation_surface_prix(df_sans_lots_tronqué):
@@ -99,5 +100,18 @@ def histogramme_densite(geo_stats_with_info):
     ax.legend(['Maison', 'Appartement'])
     ax.tick_params(axis='x', rotation=30)
     ax.grid(True, alpha=0.3, axis='y')
+    plt.tight_layout()
+    plt.show()
+
+
+def graph_ventes_par_communes(ventes_par_commune):
+    # On prend les 15 communes avec le plus de ventes
+    top15 = ventes_par_commune.head(15)
+
+    plt.figure(figsize=(10,6))
+    sns.barplot(x='nombre', y='code_commune', data=top15, palette='viridis') 
+    plt.title("Top 15 des communes avec le plus de ventes")
+    plt.xlabel("Nombre de ventes")
+    plt.ylabel("Commune")
     plt.tight_layout()
     plt.show()

@@ -1,3 +1,5 @@
+import pandas as pd
+
 def convertir_codes_communes(df):
 
     def inttostr(valeur):
@@ -79,3 +81,15 @@ def prepare_regression_dataset(df, colonnes):
     df_clean = df_selection.dropna()
     # Retourne le DataFrame final
     return df_clean
+
+
+def ajout_non_communes(df_sans_lots):
+    # Chargement de la table code_commune -> nom_commune
+    communes_df = pd.read_csv('liste_communes.csv', dtype={'code_commune': str})
+
+    # Merge avec ton df_sans_lots
+    df_sans_lots = df_sans_lots.merge(communes_df[['code_commune', 'nom_commune']],
+                                    on='code_commune',
+                                    how='left')
+
+    return df_sans_lots
