@@ -130,6 +130,89 @@ def surfaces(df_sans_lots):
     plt.show()
 
 
+def scatter_prix_densite(geo_stats_with_info, df_final):
+    """
+    Scatter plot : Prix au m² vs Densité de population par département.
+    Avec courbe de tendance linéaire.
+    
+    Parameters
+    ----------
+    geo_stats_with_info : pd.DataFrame
+        DataFrame avec densité et info départementales
+    df_final : pd.DataFrame
+        DataFrame avec prix au m² moyen par commune (index = code_commune)
+    """
+    import pandas as pd
+    from scipy import stats
+    
+    # Préparer les données : fusionner densité (dept) avec prix (commune)
+    # On suppose que geo_stats_with_info a la densité par departement
+    
+    # Créer une colonne departement à partir du code_commune
+    df_final_copy = df_final.reset_index().copy()
+    df_final_copy['departement'] = df_final_copy['code_commune'].astype(str).str[:2]
+    
+    # Fusionner avec les données de densité par département
+    merged = df_final_copy.merge(
+        geo_stats_with_info[['departement', 'densite']],
+        on='departement',
+        how='left'
+    )
+    
+    # Nettoyer : supprimer les NaN
+    merged_clean = merged.dropna(subset=['moyenne tronquée du prix au m2', 'densite'])
+    
+    if len(merged_clean) == 0:
+        print("Aucune donnée valide pour le graphique prix vs densité.")
+        return
+    
+    # Calculer la regression linéaire pour la tendance
+    x_data = merged_clean['densite'].values
+    y_data = merged_clean['moyenne tronquée du prix au m2'].values
+    
+    slope, intercept, r_value, p_value, std_err = stats.linregress(x_data, y_data)
+    line = slope * x_data + intercept
+    
+    # Plot avec plotly
+    fig = px.scatter(
+        merged_clean,
+        x='densite',
+        y='moyenne tronquée du prix au m2',
+        hover_name='nom_de_la_commune',
+        hover_data={'departement': True, 'densite': ':.1f', 'moyenne tronquée du prix au m2': ':.0f'},
+        title='Relation entre Densité de population et Prix au m² par commune',
+        labels={'densite': 'Densité (hab/km²)', 'moyenne tronquée du prix au m2': 'Prix moyen au m² (€)'},
+        height=600,
+        opacity=0.7
+    )
+    
+    # Ajouter la ligne de tendance
+    fig.add_scatter(
+        x=x_data,
+        y=line,
+        mode='lines',
+        name=f'Tendance (R²={r_value**2:.3f})',
+        line=dict(color='red', width=2, dash='dash')
+    )
+    
+    fig.update_layout(
+        xaxis_type='log',  # Échelle log pour mieux voir la distribution
+        hovermode='closest',
+        showlegend=True
+    )
+    
+    fig.show()
+    
+    # Afficher les stats de la régression
+    print(f"Relation Prix/m² vs Densité :")
+    print(f"  Pente : {slope:.2f} €/m² par unité de densité")
+    print(f"  R² : {r_value**2:.4f}")
+    print(f"  p-value : {p_value:.4e}")
+    print(f"  Interprétation : Un doublement de la densité est associé à une augmentation")
+    print(f"  du prix au m² de ~{slope * np.log(2):.0f} € (approximativement, à échelle log).")
+    print(f"  Communes analysées : {len(merged_clean)}")
+
+
 def correlation_densite_appartements(geo_stats_with_info):
     # Visualisation 2 : Relation entre densité et type de logement
     fig2 = px.scatter(geo_stats_with_info.dropna(subset=['densite']), 
