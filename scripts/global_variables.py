@@ -31,3 +31,15 @@ var_explicative_appartment = [
     'P22_MEN_ANEM0002',
     'C22_POP15P_STAT_GSEC13_23'
 ]
+
+var_explicative_appartment_lasso = [
+    'P22_APPART',
+    'P22_LOGVAC',
+    'P22_RSECOCC',
+    'P22_RPAPPART_ACH2019',
+    'P22_RPAPPART_ACH1919',
+    'P22_POP2539',
+    'P22_POP4054',
+    'C22_MENPSEUL',
+    'C22_POP15P_STAT_GSEC13_23'
+]
