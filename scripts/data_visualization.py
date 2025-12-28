@@ -160,7 +160,7 @@ def scatter_prix_densite(geo_stats_with_info, df_final):
     )
     
     # Nettoyer : supprimer les NaN
-    merged_clean = merged.dropna(subset=['moyenne tronquée du prix au m2', 'densite'])
+    merged_clean = merged.dropna(subset=['moyenne tronquée du prix au m2 maisons et appartements', 'densite'])
     
     if len(merged_clean) == 0:
         print("Aucune donnée valide pour le graphique prix vs densité.")
@@ -168,7 +168,7 @@ def scatter_prix_densite(geo_stats_with_info, df_final):
     
     # Calculer la regression linéaire pour la tendance
     x_data = merged_clean['densite'].values
-    y_data = merged_clean['moyenne tronquée du prix au m2'].values
+    y_data = merged_clean['moyenne tronquée du prix au m2 maisons et appartements'].values
     
     slope, intercept, r_value, p_value, std_err = stats.linregress(x_data, y_data)
     line = slope * x_data + intercept
@@ -177,11 +177,11 @@ def scatter_prix_densite(geo_stats_with_info, df_final):
     fig = px.scatter(
         merged_clean,
         x='densite',
-        y='moyenne tronquée du prix au m2',
+        y='moyenne tronquée du prix au m2 maisons et appartements',
         hover_name='nom de la commune',
-        hover_data={'departement': True, 'densite': ':.1f', 'moyenne tronquée du prix au m2': ':.0f'},
+        hover_data={'departement': True, 'densite': ':.1f', 'moyenne tronquée du prix au m2 maisons et appartements': ':.0f'},
         title='Relation entre Densité de population et Prix au m² par commune',
-        labels={'densite': 'Densité (hab/km²)', 'moyenne tronquée du prix au m2': 'Prix moyen au m² (€)'},
+        labels={'densite': 'Densité (hab/km²)', 'moyenne tronquée du prix au m2 maisons et appartements': 'Prix moyen au m² (€)'},
         height=600,
         opacity=0.7
     )
