@@ -24,6 +24,12 @@ def plot_log_ols_regression(model, y, X, title="Régression log-OLS",
     percentile_threshold : float
         Pourcentage à prendre en compte pour les valeurs aberrantes (par défaut : 99)
     """
+    # Assurer un index unique pour éviter InvalidIndexError
+    if not y.index.is_unique:
+        y = y.groupby(level=0).mean()
+    if not X.index.is_unique:
+        X = X.groupby(level=0).mean()
+
     # Aligner y et X de la même manière que dans la régression
     data = pd.concat([y, X], axis=1, join='inner').dropna()
     data = data[data[y.name] > 0]
