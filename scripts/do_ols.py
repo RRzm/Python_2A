@@ -21,6 +21,12 @@ def run_log_ols_regression(y, X):
         Résultat de la régression OLS sur log(Y)
     """
 
+    # Garantir un index unique pour éviter InvalidIndexError lors de la concat
+    if not y.index.is_unique:
+        y = y.groupby(level=0).mean()
+    if not X.index.is_unique:
+        X = X.groupby(level=0).mean()
+
     # Concaténation interne sur l'index entre Y et X
     data = pd.concat([y, X], axis=1, join='inner')
 
