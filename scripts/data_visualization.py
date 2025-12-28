@@ -178,7 +178,7 @@ def scatter_prix_densite(geo_stats_with_info, df_final):
         merged_clean,
         x='densite',
         y='moyenne tronquée du prix au m2',
-        hover_name='nom_de_la_commune',
+        hover_name='nom de la commune',
         hover_data={'departement': True, 'densite': ':.1f', 'moyenne tronquée du prix au m2': ':.0f'},
         title='Relation entre Densité de population et Prix au m² par commune',
         labels={'densite': 'Densité (hab/km²)', 'moyenne tronquée du prix au m2': 'Prix moyen au m² (€)'},
