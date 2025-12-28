@@ -1,3 +1,8 @@
 numpy
 folium
 openpyxl
+pandas
+statsmodels
+scikit-learn
+matplotlib
+plotly
