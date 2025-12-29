@@ -4,6 +4,7 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 import numpy as np
 import json
+import sys
 
 # Heatmap Folium basée sur df filtré (maisons/appartements) avec lat/lon
 # df doit contenir 'nom_commune', 'code_commune', 'latitude', 'longitude'
