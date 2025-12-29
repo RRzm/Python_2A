@@ -136,3 +136,44 @@ def ajout_non_communes(df_sans_lots, communes_df):
                                     how='left')
 
     return df_sans_lots
+
+
+# --- Outils de contrôle qualité ---
+
+def resume_manquants(df, colonnes):
+    """
+    Retourne un DataFrame avec le nombre et le pourcentage de valeurs manquantes
+    pour un sous-ensemble de colonnes.
+    """
+    resume = (
+        df[colonnes]
+        .isna()
+        .sum()
+        .rename("n_manquants")
+        .to_frame()
+    )
+    resume["pct_manquants"] = (resume["n_manquants"] / len(df)) * 100
+    resume = resume.sort_values("pct_manquants", ascending=False)
+    return resume
+
+
+def borne_rapide(series, lower=0.01, upper=0.99):
+    """
+    Calcule rapidement des bornes robustes pour une série numérique.
+    """
+    q_low, q_hi = series.quantile([lower, upper])
+    return q_low, q_hi
+
+
+def rapport_outliers(series, lower=0.01, upper=0.99):
+    """
+    Renvoie la part d'observations en dehors des bornes quantiles.
+    """
+    q_low, q_hi = borne_rapide(series, lower, upper)
+    mask = (series < q_low) | (series > q_hi)
+    part_outliers = mask.mean() * 100
+    return {
+        "borne_basse": q_low,
+        "borne_haute": q_hi,
+        "pct_outliers": part_outliers,
+    }
