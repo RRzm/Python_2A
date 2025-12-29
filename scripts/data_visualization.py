@@ -192,8 +192,6 @@ def scatter_prix_densite(geo_stats_with_info, df_final):
     # Extraire le code département de df_final pour agréger
     def extract_dept(code_commune):
         code_str = str(code_commune)
-        if code_str.startswith(('97', '98')):
-            return code_str[:3]
         return code_str[:2]
     
     df_copy = df_final.reset_index().copy()
@@ -347,13 +345,9 @@ def carte_choropleth_departements_prix_m2(
     if value_col not in df_source.columns:
         raise KeyError(f"La colonne '{value_col}' est absente des données.")
 
-    # Extraire le code département (DOM gérés: 3 chiffres, sinon 2)
     def extract_departement(code_commune):
         code_commune = str(code_commune)
-        if code_commune.startswith(('97', '98')):
-            return code_commune[:3]
         return code_commune[:2]
-
     df = df_source.copy()
     df = df.dropna(subset=['code_commune', value_col])
     df = df[df[value_col] > 0]
@@ -427,8 +421,6 @@ def carte_choropleth_departements_surfaces(
     # Extraire le code département (DOM gérés: 3 chiffres, sinon 2)
     def extract_departement(code_commune):
         code_commune = str(code_commune)
-        if code_commune.startswith(('97', '98')):
-            return code_commune[:3]
         return code_commune[:2]
 
     df = df_source.copy()
