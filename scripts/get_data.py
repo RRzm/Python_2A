@@ -88,15 +88,8 @@ def extract_departement(code_commune):
     ----------
     code_commune : str | int
         Code commune au format INSEE.
-
-    Retour
-    ------
-    str
-        Code département: 2 caractères pour la métropole, 3 pour DOM (97/98).
     """
     code_commune = str(code_commune)
-    if code_commune.startswith(("97", "98")):
-        return code_commune[:3]   # DOM
     return code_commune[:2]       # Métropole
 
 
