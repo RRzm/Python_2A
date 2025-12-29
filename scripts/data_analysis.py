@@ -52,10 +52,16 @@ def relation_surface_prix(df_sans_lots_tronqué):
     plt.show()
 
 
-def top_departements(geo_stats_sorted):
-    print(f"Statistiques calculées pour {len(geo_stats_sorted)} départements")
+def top_departements(geo_stats_with_info):
+    print(f"Statistiques calculées pour {len(geo_stats_with_info)} départements")
     print("\nTop 10 départements par nombre de ventes :")
-    print(geo_stats_sorted.head(10))
+    # Afficher les colonnes pertinentes avec noms lisibles
+    colonnes_affichage = ['dept_nom', 'total', 'Maison', 'Appartement', 'pct_maison', 'pct_appartement', 'densite']
+    top10 = geo_stats_with_info[colonnes_affichage].head(10).copy()
+    top10['densite'] = top10['densite'].round(0).astype(int)
+    top10['pct_maison'] = top10['pct_maison'].round(1)
+    top10['pct_appartement'] = top10['pct_appartement'].round(1)
+    print(top10.to_string(index=False))
 
 
 def pourcentage_maisons_appartements(geo_stats_with_info):
