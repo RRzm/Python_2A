@@ -3,6 +3,7 @@ from folium.plugins import HeatMap
 import plotly.express as px
 import matplotlib.pyplot as plt
 import numpy as np
+import json
 
 # Heatmap Folium basée sur df filtré (maisons/appartements) avec lat/lon
 # df doit contenir 'nom_commune', 'code_commune', 'latitude', 'longitude'
@@ -183,27 +184,34 @@ def scatter_prix_densite(geo_stats_with_info, df_final):
     geo_stats_with_info : pd.DataFrame
         DataFrame avec densité et info départementales
     df_final : pd.DataFrame
-        DataFrame avec prix au m² moyen par commune (index = code_commune)
+        DataFrame avec prix au m² moyen par commune
     """
     import pandas as pd
     from scipy import stats
     
-    # Préparer les données : fusionner densité (dept) avec prix (commune)
-    # On suppose que geo_stats_with_info a la densité par departement
+    # Extraire le code département de df_final pour agréger
+    def extract_dept(code_commune):
+        code_str = str(code_commune)
+        if code_str.startswith(('97', '98')):
+            return code_str[:3]
+        return code_str[:2]
     
-    # Créer une colonne departement à partir du code_commune
-    df_final_copy = df_final.reset_index().copy()
-    df_final_copy['departement'] = df_final_copy['code_commune'].astype(str).str[:2]
+    df_copy = df_final.reset_index().copy()
+    df_copy['departement'] = df_copy['code_commune'].astype(str).apply(extract_dept)
     
-    # Fusionner avec les données de densité par département
-    merged = df_final_copy.merge(
-        geo_stats_with_info[['departement', 'densite']],
+    # Calculer prix moyen par département
+    prix_par_dept = df_copy.groupby('departement').agg({
+        'moyenne tronquée du prix au m2 maisons et appartements': 'mean'
+    }).reset_index()
+    
+    # Fusionner avec densité départementale
+    merged = prix_par_dept.merge(
+        geo_stats_with_info[['departement', 'densite', 'dept_nom']],
         on='departement',
-        how='left'
+        how='inner'
     )
     
-    # Nettoyer : supprimer les NaN
-    merged_clean = merged.dropna(subset=['moyenne tronquée du prix au m2 maisons et appartements', 'densite'])
+    merged_clean = merged.dropna(subset=['densite', 'moyenne tronquée du prix au m2 maisons et appartements'])
     
     if len(merged_clean) == 0:
         print("Aucune donnée valide pour le graphique prix vs densité.")
@@ -221,12 +229,20 @@ def scatter_prix_densite(geo_stats_with_info, df_final):
         merged_clean,
         x='densite',
         y='moyenne tronquée du prix au m2 maisons et appartements',
-        hover_name='nom de la commune',
-        hover_data={'departement': True, 'densite': ':.1f', 'moyenne tronquée du prix au m2 maisons et appartements': ':.0f'},
-        title='Relation entre Densité de population et Prix au m² par commune',
-        labels={'densite': 'Densité (hab/km²)', 'moyenne tronquée du prix au m2 maisons et appartements': 'Prix moyen au m² (€)'},
+        hover_name='dept_nom',
+        hover_data={
+            'densite': ':.0f',
+            'moyenne tronquée du prix au m2 maisons et appartements': ':.0f',
+            'departement': True,
+            'dept_nom': False
+        },
+        title='Relation entre Densité de population et Prix au m² par département',
+        labels={
+            'densite': 'Densité (hab/km²)',
+            'moyenne tronquée du prix au m2 maisons et appartements': 'Prix moyen au m² (€)'
+        },
         height=600,
-        opacity=0.7
+        opacity=0.8
     )
     
     # Ajouter la ligne de tendance
@@ -239,7 +255,7 @@ def scatter_prix_densite(geo_stats_with_info, df_final):
     )
     
     fig.update_layout(
-        xaxis_type='log',  # Échelle log pour mieux voir la distribution
+        xaxis_type='log',
         hovermode='closest',
         showlegend=True
     )
@@ -247,13 +263,11 @@ def scatter_prix_densite(geo_stats_with_info, df_final):
     fig.show()
     
     # Afficher les stats de la régression
-    print(f"Relation Prix/m² vs Densité :")
-    print(f"  Pente : {slope:.2f} €/m² par unité de densité")
+    print(f"Relation Prix/m² vs Densité par département :")
+    print(f"  Pente : {slope:.4f} €/m² par hab/km²")
     print(f"  R² : {r_value**2:.4f}")
     print(f"  p-value : {p_value:.4e}")
-    print(f"  Interprétation : Un doublement de la densité est associé à une augmentation")
-    print(f"  du prix au m² de ~{slope * np.log(2):.0f} € (approximativement, à échelle log).")
-    print(f"  Communes analysées : {len(merged_clean)}")
+    print(f"  Départements analysés : {len(merged_clean)}")
 
 
 def correlation_densite_appartements(geo_stats_with_info):
@@ -296,3 +310,159 @@ def correlation_densite_appartements(geo_stats_with_info):
     )
 
     fig2.show()
+
+
+def carte_choropleth_departements_prix_m2(
+    df_source,
+    *,
+    value_col='rapport valeur foncière et surface bâtie',
+    agg='median',
+    geojson_path='Données/data/departements-100m.geojson',
+    tiles='cartodbpositron'
+    ):
+    """
+    Crée une carte choropleth des départements colorés par prix moyen au m².
+
+    Paramètres
+    ----------
+    df_source : pd.DataFrame
+        Données individuelles DVF, avec au minimum 'code_commune' et
+        la colonne de valeur spécifiée par `value_col`.
+    value_col : str
+        Nom de la colonne mesurant le prix/m² (par défaut le rapport
+        valeur foncière / surface bâtie).
+    agg : {'mean','median'}
+        Fonction d'agrégation pour obtenir la métrique par département.
+    geojson_path : str
+        Chemin vers le GeoJSON des départements (doit contenir
+        properties.code pour le code département).
+    tiles : str
+        Fond de carte Folium.
+
+    Retour
+    ------
+    folium.Map
+        Carte choropleth Folium centrée sur la France.
+    """
+    if value_col not in df_source.columns:
+        raise KeyError(f"La colonne '{value_col}' est absente des données.")
+
+    # Extraire le code département (DOM gérés: 3 chiffres, sinon 2)
+    def extract_departement(code_commune):
+        code_commune = str(code_commune)
+        if code_commune.startswith(('97', '98')):
+            return code_commune[:3]
+        return code_commune[:2]
+
+    df = df_source.copy()
+    df = df.dropna(subset=['code_commune', value_col])
+    df = df[df[value_col] > 0]
+    df['departement'] = df['code_commune'].astype(str).apply(extract_departement)
+
+    if agg == 'mean':
+        agg_df = df.groupby('departement', as_index=False)[value_col].mean()
+    elif agg == 'median':
+        agg_df = df.groupby('departement', as_index=False)[value_col].median()
+    else:
+        raise ValueError("agg doit être 'mean' ou 'median'")
+
+    agg_df.rename(columns={value_col: 'prix_m2'}, inplace=True)
+
+    # Charger le GeoJSON des départements
+    with open(geojson_path, 'r', encoding='utf-8') as f:
+        departements_geojson = json.load(f)
+
+    m = folium.Map(location=[46.5, 2.5], zoom_start=6, tiles=tiles)
+
+    folium.Choropleth(
+        geo_data=departements_geojson,
+        name='choropleth',
+        data=agg_df,
+        columns=['departement', 'prix_m2'],
+        key_on='feature.properties.code',
+        fill_color='YlOrRd',
+        fill_opacity=0.8,
+        line_opacity=0.2,
+        legend_name='Prix au m² (médiane par département)'
+    ).add_to(m)
+
+    folium.LayerControl().add_to(m)
+    return m
+
+
+def carte_choropleth_departements_surfaces(
+    df_source,
+    *,
+    value_col='surface_reelle_bati',
+    agg='median',
+    geojson_path='Données/data/departements-100m.geojson',
+    tiles='cartodbpositron'
+):
+    """
+    Crée une carte choropleth des départements colorés par surface moyenne/médiane.
+
+    Paramètres
+    ----------
+    df_source : pd.DataFrame
+        Données individuelles DVF, avec au minimum 'code_commune' et
+        'surface_reelle_bati'.
+    value_col : str
+        Nom de la colonne de surface (par défaut 'surface_reelle_bati').
+    agg : {'mean','median'}
+        Fonction d'agrégation pour obtenir la métrique par département.
+    geojson_path : str
+        Chemin vers le GeoJSON des départements (doit contenir
+        properties.code pour le code département).
+    tiles : str
+        Fond de carte Folium.
+
+    Retour
+    ------
+    folium.Map
+        Carte choropleth Folium centrée sur la France.
+    """
+    if value_col not in df_source.columns:
+        raise KeyError(f"La colonne '{value_col}' est absente des données.")
+
+    # Extraire le code département (DOM gérés: 3 chiffres, sinon 2)
+    def extract_departement(code_commune):
+        code_commune = str(code_commune)
+        if code_commune.startswith(('97', '98')):
+            return code_commune[:3]
+        return code_commune[:2]
+
+    df = df_source.copy()
+    df = df.dropna(subset=['code_commune', value_col])
+    df = df[df[value_col] > 0]
+    df['departement'] = df['code_commune'].astype(str).apply(extract_departement)
+
+    if agg == 'mean':
+        agg_df = df.groupby('departement', as_index=False)[value_col].mean()
+    elif agg == 'median':
+        agg_df = df.groupby('departement', as_index=False)[value_col].median()
+    else:
+        raise ValueError("agg doit être 'mean' ou 'median'")
+
+    agg_df.rename(columns={value_col: 'surface_m2'}, inplace=True)
+
+    # Charger le GeoJSON des départements (import local pour robustesse)
+    import json
+    with open(geojson_path, 'r', encoding='utf-8') as f:
+        departements_geojson = json.load(f)
+
+    m = folium.Map(location=[46.5, 2.5], zoom_start=6, tiles=tiles)
+
+    folium.Choropleth(
+        geo_data=departements_geojson,
+        name='choropleth',
+        data=agg_df,
+        columns=['departement', 'surface_m2'],
+        key_on='feature.properties.code',
+        fill_color='Blues',
+        fill_opacity=0.8,
+        line_opacity=0.2,
+        legend_name='Surface (m², médiane par département)'
+    ).add_to(m)
+
+    folium.LayerControl().add_to(m)
+    return m
