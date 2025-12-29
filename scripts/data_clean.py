@@ -31,6 +31,21 @@ def convertir_codes_communes(df):
 
 
 def filtre_donnes_pop(df_pop):
+    """
+    Identifie les lignes contenant des valeurs manquantes dans les colonnes
+    de population d'intérêt et retourne uniquement ces lignes.
+
+    Paramètres
+    ----------
+    df_pop : pd.DataFrame
+        DataFrame de population (ex. INSEE) contenant la colonne 'p19_pop'.
+
+    Retour
+    ------
+    pd.DataFrame
+        Sous-ensemble des lignes présentant au moins une valeur manquante
+        parmi les colonnes contrôlées.
+    """
     cols = ["p19_pop"]
     df_pop[cols].isna().sum()
     lignes_na = df_pop[df_pop[cols].isna().any(axis=1)]
@@ -130,6 +145,22 @@ def prepare_regression_dataset(df, colonnes):
 
 
 def ajout_non_communes(df_sans_lots, communes_df):
+    """
+    Ajoute le libellé de commune au DataFrame DVF par jointure sur le code
+    commune.
+
+    Paramètres
+    ----------
+    df_sans_lots : pd.DataFrame
+        Données DVF filtrées, avec la colonne 'code_commune'.
+    communes_df : pd.DataFrame
+        Référentiel des communes contenant 'code_commune' et 'nom_commune'.
+
+    Retour
+    ------
+    pd.DataFrame
+        DataFrame enrichi de la colonne 'nom_commune'.
+    """
     # Merge avec ton df_sans_lots
     df_sans_lots = df_sans_lots.merge(communes_df[['code_commune', 'nom_commune']],
                                     on='code_commune',

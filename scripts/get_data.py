@@ -80,8 +80,20 @@ def get_pop():
     return df_pop
 
 
-
 def extract_departement(code_commune):
+    """
+    Extrait le code département à partir d'un code commune (DOM gérés).
+
+    Paramètres
+    ----------
+    code_commune : str | int
+        Code commune au format INSEE.
+
+    Retour
+    ------
+    str
+        Code département: 2 caractères pour la métropole, 3 pour DOM (97/98).
+    """
     code_commune = str(code_commune)
     if code_commune.startswith(("97", "98")):
         return code_commune[:3]   # DOM

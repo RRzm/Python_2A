@@ -9,6 +9,21 @@ import numpy as np
 
 
 def carte_a_densite(df_source):
+    """
+    Génère une carte de chaleur Folium représentant l'intensité des ventes
+    par commune à partir de points (latitude/longitude).
+
+    Paramètres
+    ----------
+    df_source : pd.DataFrame
+        Données individuelles avec au minimum 'nom_commune', 'code_commune',
+        'latitude' et 'longitude'.
+
+    Retour
+    ------
+    folium.Map
+        Carte Folium avec une couche HeatMap ajoutée.
+    """
     df_points = df_source.dropna(subset=['latitude', 'longitude']).copy()
 
     ventes_par_commune = (
@@ -52,6 +67,20 @@ def carte_a_densite(df_source):
 
 
 def carte_repartition_ventes(df):
+    """
+    Affiche avec Plotly une carte des ventes agrégées par commune
+    (taille et couleur proportionnelles au nombre de ventes).
+
+    Paramètres
+    ----------
+    df : pd.DataFrame
+        Données individuelles filtrées (maisons/appartements) contenant
+        'nom_commune', 'code_commune', 'latitude', 'longitude'.
+
+    Retour
+    ------
+    None
+    """
     # Utilisation du df déjà filtré (maisons et appartements uniquement)
     # Compter le nombre de ventes par commune
     ventes_par_commune_carte = df.groupby(['nom_commune', 'code_commune']).size().reset_index(name='nb_ventes')
@@ -95,6 +124,20 @@ def carte_repartition_ventes(df):
 
 
 def surfaces(df_sans_lots):
+    """
+    Explore la distribution des surfaces bâties des biens (hors outliers)
+    et produit un boxplot par type de bien ainsi qu'un histogramme.
+
+    Paramètres
+    ----------
+    df_sans_lots : pd.DataFrame
+        Données DVF nettoyées avec au minimum 'surface_reelle_bati'
+        et 'type_local'.
+
+    Retour
+    ------
+    None
+    """
 
     # Utilisation du df_sans_lots déjà créé
     df_surface = df_sans_lots[df_sans_lots['surface_reelle_bati'].notna()].copy()
@@ -214,6 +257,20 @@ def scatter_prix_densite(geo_stats_with_info, df_final):
 
 
 def correlation_densite_appartements(geo_stats_with_info):
+    """
+    Visualise la relation entre la densité de population et la part
+    d'appartements par département.
+
+    Paramètres
+    ----------
+    geo_stats_with_info : pd.DataFrame
+        Tableau agrégé par département avec colonnes 'densite',
+        'pct_appartement', 'Maison', 'Appartement', 'dept_nom' et 'total'.
+
+    Retour
+    ------
+    None
+    """
     # Visualisation 2 : Relation entre densité et type de logement
     fig2 = px.scatter(geo_stats_with_info.dropna(subset=['densite']), 
                     x='densite', 

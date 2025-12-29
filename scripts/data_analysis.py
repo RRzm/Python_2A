@@ -5,6 +5,28 @@ import seaborn as sns
 
 
 def relation_surface_prix(df_sans_lots_tronqué):
+    """
+    Analyse la relation entre surface et prix, et la distribution
+    du prix au m² par type de bien.
+
+    Paramètres
+    ----------
+    df_sans_lots_tronqué : pd.DataFrame
+        Données DVF filtrées et tronquées des outliers, contenant au minimum
+        les colonnes 'type_local', 'surface_reelle_bati', 'valeur_fonciere',
+        et 'rapport valeur foncière et surface bâtie'.
+
+    Effets
+    ------
+    - Affiche des statistiques descriptives par type de bien.
+    - Produit deux figures matplotlib (scatter surface vs prix, répartition
+      par tranches de prix au m²).
+
+    Retour
+    ------
+    None
+    """
+    
     # Utilisation du df_sans_lots_tronqué déjà créé pour l'analyse du prix au m²
     df_prix_m2 = df_sans_lots_tronqué.copy()
 
@@ -53,6 +75,21 @@ def relation_surface_prix(df_sans_lots_tronqué):
 
 
 def top_departements(geo_stats_with_info):
+    """
+    Affiche les 10 premiers départements selon le nombre de ventes,
+    avec pourcentages par type de bien et densité.
+
+    Paramètres
+    ----------
+    geo_stats_with_info : pd.DataFrame
+        Tableau agrégé par département contenant au minimum les colonnes
+        'dept_nom', 'total', 'Maison', 'Appartement', 'pct_maison',
+        'pct_appartement' et 'densite'.
+
+    Retour
+    ------
+    None
+    """
     print(f"Statistiques calculées pour {len(geo_stats_with_info)} départements")
     print("\nTop 10 départements par nombre de ventes :")
     # Afficher les colonnes pertinentes avec noms lisibles
@@ -65,6 +102,20 @@ def top_departements(geo_stats_with_info):
 
 
 def pourcentage_maisons_appartements(geo_stats_with_info):
+    """
+    Représente en barres empilées la répartition Maison vs Appartement
+    par département (Top 30 lignes du DataFrame).
+
+    Paramètres
+    ----------
+    geo_stats_with_info : pd.DataFrame
+        Données par département comprenant 'dept_nom', 'pct_maison',
+        'pct_appartement' et idéalement 'densite'.
+
+    Retour
+    ------
+    None
+    """
     # Visualisation 1 : Graphique en barres empilées avec noms
     fig1 = px.bar(geo_stats_with_info.head(30), 
         x='dept_nom', 
@@ -88,6 +139,20 @@ def pourcentage_maisons_appartements(geo_stats_with_info):
 
 
 def histogramme_densite(geo_stats_with_info):
+    """
+    Compare la part moyenne de maisons et d'appartements selon des
+    catégories de densité de population.
+
+    Paramètres
+    ----------
+    geo_stats_with_info : pd.DataFrame
+        Données par département avec la colonne 'densite' et les
+        colonnes 'pct_maison' et 'pct_appartement'.
+
+    Retour
+    ------
+    None
+    """
     # Visualisation : Type de logement par catégorie de densité
     # On ne conserve que l'histogramme par catégorie de densité
     geo_stats_with_info['categorie_densite'] = pd.cut(
@@ -111,6 +176,19 @@ def histogramme_densite(geo_stats_with_info):
 
 
 def graph_ventes_par_communes(ventes_par_commune):
+    """
+    Affiche un barplot des 15 communes comptant le plus de ventes.
+
+    Paramètres
+    ----------
+    ventes_par_commune : pd.DataFrame
+        DataFrame trié par nombre de ventes décroissant, contenant au
+        minimum 'nom_commune' et 'nombre'.
+
+    Retour
+    ------
+    None
+    """
     # On prend les 15 communes avec le plus de ventes
     top15 = ventes_par_commune.head(15)
 
