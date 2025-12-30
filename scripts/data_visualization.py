@@ -220,6 +220,7 @@ def correlation_densite_appartements(geo_stats_with_info):
     ------
     None
     """
+    
     # Visuel : Relation entre densité et type de logement
     fig2 = px.scatter(geo_stats_with_info.dropna(subset=['densite']), 
                     x='densite', 
