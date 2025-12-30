@@ -81,7 +81,7 @@ def surfaces(df_sans_lots):
     # Utilisation du df_sans_lots déjà créé
     df_surface = df_sans_lots[df_sans_lots['surface_reelle_bati'].notna()].copy()
     df_surface = df_surface[df_surface['surface_reelle_bati'] > 0]
-    df_surface = df_surface[df_surface['surface_reelle_bati'] < 300]  # Enlever les outliers extrêmes
+    df_surface = df_surface[df_surface['surface_reelle_bati'] < 300]  # Enlever les valeurs extrêmes
 
     print("Statistiques des surfaces par type de bien :")
     print("="*70)

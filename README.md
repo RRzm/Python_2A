@@ -24,9 +24,13 @@ L'analyse économétrique proposée en fin de projet permet enfin d'apporter une
 Notre travail mobilise plusieurs bases de données publiques :
 
 • Le fichier DVF du ministère de l'Économie et des Finances, qui constitue la référence nationale en matière de transactions immobilières (disponible sur data.gouv.fr), stocké sur SSP Cloud.
-• Un fichier de populations par communes produit par le département du Loiret à partir de données INSEE et mis en ligne sur datagouv
+
+• Un fichier de populations par communes produit par le département du Loiret à partir de données INSEE et mis en ligne sur datagouv.
+
 • Les référentiels géographiques (codes communes, contours départementaux) fournis par l'INSEE et l'IGN, disponibles au format CSV dans le projet.
-• Le "dossier complet" de l'INSEE, disponible sur le site de l'INSEE et rassemblant de nombreux indicateurs communaux
+
+• Le "dossier complet" de l'INSEE, disponible sur le site de l'INSEE et rassemblant de nombreux indicateurs communaux.
+
 Toutes ces données ont été récupérées au format CSV ou JSON, puis harmonisées pour permettre leur croisement géographique.
 
 ## Organisation du dépôt
