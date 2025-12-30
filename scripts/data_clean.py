@@ -1,10 +1,9 @@
 import pandas as pd
 
+
 def convertir_codes_communes(df):
     """
     Convertit les codes communes en string pour éviter les pertes d'information.
-    
-    Certains codes communes (2A, 2B en Corse) ne peuvent pas être convertis en int.
     
     Paramètres
     ----------
@@ -23,7 +22,7 @@ def convertir_codes_communes(df):
         if isinstance(valeur, int):
             return str(valeur)
         else:
-            # Si c'est déjà une str, None, float, etc., on le retourne tel quel
+            # Si c'est déjà de type string, on renvoie directement
             return valeur
 
     df.loc[:, 'code_commune'] = df['code_commune'].apply(inttostr)
@@ -38,13 +37,12 @@ def filtre_donnes_pop(df_pop):
     Paramètres
     ----------
     df_pop : pd.DataFrame
-        DataFrame de population (ex. INSEE) contenant la colonne 'p19_pop'.
+        DataFrame de population (ex ici : INSEE) contenant la colonne 'p19_pop' (population en 2019)
 
     Retour
     ------
     pd.DataFrame
-        Sous-ensemble des lignes présentant au moins une valeur manquante
-        parmi les colonnes contrôlées.
+        Lignes présentant au moins une valeur manquante
     """
     cols = ["p19_pop"]
     df_pop[cols].isna().sum()
@@ -55,8 +53,6 @@ def filtre_donnes_pop(df_pop):
 def enleverchiffreDOMs(code):
     """
     Supprime le 3ème chiffre des codes communes DOM à 6 chiffres.
-    
-    Exemple: '974421' (Réunion) -> '97421' (harmonisation avec DVF)
     
     Paramètres
     ----------
@@ -69,14 +65,14 @@ def enleverchiffreDOMs(code):
         Code commune harmonisé (5 chiffres)
     """
     if len(code) == 6:
-        # retirer le 3ème caractère (index 2)
+        # retirer le 3ème caractère (index 2) si  concerné
         return code[:2] + code[3:]
     return code
 
 
 def troncature_lots(df1):
     """
-    Tronque les prix aberrants par commune (méthode robuste).
+    Tronque les prix aberrants par commune
     
     Calcule les quantiles (2.5% et 97.5%) par commune, puis supprime
     les valeurs en dehors de cet intervalle pour chaque commune.
@@ -89,9 +85,8 @@ def troncature_lots(df1):
     Returns
     -------
     pd.DataFrame
-        DataFrame tronqué (outliers supprimés)
+        DataFrame tronqué
     """
-
     # Calcul des quantiles 0.025 et 0.975 par commune :
     quantiles_par_commune = (
         df1
@@ -117,33 +112,6 @@ def troncature_lots(df1):
     return df2
 
 
-###
-
-def prepare_regression_dataset(df, colonnes):
-    """
-    Sélectionne les colonnes nécessaires à la régression
-    et supprime toutes les lignes contenant des valeurs manquantes (NaN).
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        DataFrame original contenant toutes les variables
-    colonnes : list
-        Liste des noms de colonnes à conserver
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame nettoyé, prêt pour une régression linéaire
-    """
-    # Sélection des colonnes d'intérêt
-    df_selection = df[colonnes].copy()
-    # Suppression des lignes avec au moins une valeur manquante
-    df_clean = df_selection.dropna()
-    # Retourne le DataFrame final
-    return df_clean
-
-
 def ajout_non_communes(df_sans_lots, communes_df):
     """
     Ajoute le libellé de commune au DataFrame DVF par jointure sur le code
@@ -161,50 +129,9 @@ def ajout_non_communes(df_sans_lots, communes_df):
     pd.DataFrame
         DataFrame enrichi de la colonne 'nom_commune'.
     """
-    # Merge avec ton df_sans_lots
+    
     df_sans_lots = df_sans_lots.merge(communes_df[['code_commune', 'nom_commune']],
                                     on='code_commune',
                                     how='left')
 
     return df_sans_lots
-
-
-# --- Outils de contrôle qualité ---
-
-def resume_manquants(df, colonnes):
-    """
-    Retourne un DataFrame avec le nombre et le pourcentage de valeurs manquantes
-    pour un sous-ensemble de colonnes.
-    """
-    resume = (
-        df[colonnes]
-        .isna()
-        .sum()
-        .rename("n_manquants")
-        .to_frame()
-    )
-    resume["pct_manquants"] = (resume["n_manquants"] / len(df)) * 100
-    resume = resume.sort_values("pct_manquants", ascending=False)
-    return resume
-
-
-def borne_rapide(series, lower=0.01, upper=0.99):
-    """
-    Calcule rapidement des bornes robustes pour une série numérique.
-    """
-    q_low, q_hi = series.quantile([lower, upper])
-    return q_low, q_hi
-
-
-def rapport_outliers(series, lower=0.01, upper=0.99):
-    """
-    Renvoie la part d'observations en dehors des bornes quantiles.
-    """
-    q_low, q_hi = borne_rapide(series, lower, upper)
-    mask = (series < q_low) | (series > q_hi)
-    part_outliers = mask.mean() * 100
-    return {
-        "borne_basse": q_low,
-        "borne_haute": q_hi,
-        "pct_outliers": part_outliers,
-    }

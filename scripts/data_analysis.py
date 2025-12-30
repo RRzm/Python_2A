@@ -12,15 +12,11 @@ def relation_surface_prix(df_sans_lots_tronqué):
     Paramètres
     ----------
     df_sans_lots_tronqué : pd.DataFrame
-        Données DVF filtrées et tronquées des outliers, contenant au minimum
-        les colonnes 'type_local', 'surface_reelle_bati', 'valeur_fonciere',
-        et 'rapport valeur foncière et surface bâtie'.
-
+        Données DVF filtrées et tronquées
     Effets
     ------
     - Affiche des statistiques descriptives par type de bien.
-    - Produit deux figures matplotlib (scatter surface vs prix, répartition
-      par tranches de prix au m²).
+    - Produit deux figures matplotlib
 
     Retour
     ------
@@ -39,7 +35,7 @@ def relation_surface_prix(df_sans_lots_tronqué):
     stats_m2 = df_prix_m2.groupby('type_local')['prix_m2'].describe()
     print(stats_m2)
 
-    # Figure 1 : Scatter Surface vs Prix total
+    # Figure 1 : sccatter
     fig, axes = plt.subplots(1, 2, figsize=(16, 6))
     ax1, ax2 = axes
 
@@ -82,9 +78,7 @@ def top_departements(geo_stats_with_info):
     Paramètres
     ----------
     geo_stats_with_info : pd.DataFrame
-        Tableau agrégé par département contenant au minimum les colonnes
-        'dept_nom', 'total', 'Maison', 'Appartement', 'pct_maison',
-        'pct_appartement' et 'densite'.
+        Tableau agrégé par département
 
     Retour
     ------
@@ -109,14 +103,13 @@ def pourcentage_maisons_appartements(geo_stats_with_info):
     Paramètres
     ----------
     geo_stats_with_info : pd.DataFrame
-        Données par département comprenant 'dept_nom', 'pct_maison',
-        'pct_appartement' et idéalement 'densite'.
+        Données par département
 
     Retour
     ------
     None
     """
-    # Visualisation 1 : Graphique en barres empilées avec noms
+    # Visualisation : graphique en barres
     fig1 = px.bar(geo_stats_with_info.head(30), 
         x='dept_nom', 
         y=['pct_maison', 'pct_appartement'],
@@ -146,8 +139,7 @@ def histogramme_densite(geo_stats_with_info):
     Paramètres
     ----------
     geo_stats_with_info : pd.DataFrame
-        Données par département avec la colonne 'densite' et les
-        colonnes 'pct_maison' et 'pct_appartement'.
+        Données par départements
 
     Retour
     ------

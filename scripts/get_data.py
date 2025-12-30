@@ -57,11 +57,6 @@ def get_local_csv(filename, sep=','):
     --------
     pd.DataFrame
         DataFrame contenant les données du CSV
-    Exemple:
-    --------
-    df = get_local_csv('pharmacies_point.csv')
-    # ou
-    df = get_local_csv('pharmacies_point')
     """
     # Chemin vers le dossier Données (relatif au dossier scripts)
     donnees_path = os.path.join(os.path.dirname(__file__), '..', 'Données')
@@ -96,7 +91,7 @@ def extract_departement(code_commune):
 
 def get_departements_from_geojson(path="data/departements-100m.geojson"):
     """
-    Récupère les départements français et leurs superficies depuis le GeoJSON officiel.
+    Récupère les départements français et leurs superficies depuis le GeoJSON.
     
     Parameters
     ----------

@@ -6,67 +6,6 @@ import numpy as np
 import json
 import sys
 
-# Heatmap Folium basée sur df filtré (maisons/appartements) avec lat/lon
-# df doit contenir 'nom_commune', 'code_commune', 'latitude', 'longitude'
-
-
-def carte_a_densite(df_source):
-    """
-    Génère une carte de chaleur Folium représentant l'intensité des ventes
-    par commune à partir de points (latitude/longitude).
-
-    Paramètres
-    ----------
-    df_source : pd.DataFrame
-        Données individuelles avec au minimum 'nom_commune', 'code_commune',
-        'latitude' et 'longitude'.
-
-    Retour
-    ------
-    folium.Map
-        Carte Folium avec une couche HeatMap ajoutée.
-    """
-    df_points = df_source.dropna(subset=['latitude', 'longitude']).copy()
-
-    ventes_par_commune = (
-        df_points.groupby(['nom_commune', 'code_commune'])
-        .size()
-        .reset_index(name='nb_ventes')
-    )
-
-    coords_par_commune = (
-        df_points.groupby(['nom_commune', 'code_commune'])
-        .agg({'latitude': 'mean', 'longitude': 'mean'})
-        .reset_index()
-    )
-
-    carte_data = ventes_par_commune.merge(
-        coords_par_commune,
-        on=['nom_commune', 'code_commune']
-    )
-
-    heat_data = carte_data[['latitude', 'longitude', 'nb_ventes']].values.tolist()
-
-    m = folium.Map(location=[46.5, 2.5], zoom_start=6, tiles='cartodbpositron')
-
-    HeatMap(
-        heat_data,
-        min_opacity=0.2,
-        max_zoom=13,
-        radius=30,
-        blur=25,
-        gradient={
-            0.0: 'blue',
-            0.3: 'cyan',
-            0.5: 'lime',
-            0.7: 'yellow',
-            0.9: 'orange',
-            1.0: 'red'
-        }
-    ).add_to(m)
-
-    return m
-
 
 def carte_repartition_ventes(df):
     """
@@ -76,8 +15,7 @@ def carte_repartition_ventes(df):
     Paramètres
     ----------
     df : pd.DataFrame
-        Données individuelles filtrées (maisons/appartements) contenant
-        'nom_commune', 'code_commune', 'latitude', 'longitude'.
+        Données filtrées
 
     Retour
     ------
@@ -127,14 +65,13 @@ def carte_repartition_ventes(df):
 
 def surfaces(df_sans_lots):
     """
-    Explore la distribution des surfaces bâties des biens (hors outliers)
+    Explore la distribution des surfaces bâties des biens
     et produit un boxplot par type de bien ainsi qu'un histogramme.
 
     Paramètres
     ----------
     df_sans_lots : pd.DataFrame
-        Données DVF nettoyées avec au minimum 'surface_reelle_bati'
-        et 'type_local'.
+        Données DVF nettoyées
 
     Retour
     ------
@@ -177,8 +114,7 @@ def surfaces(df_sans_lots):
 
 def scatter_prix_densite(geo_stats_with_info, df_final):
     """
-    Scatter plot : Prix au m² vs Densité de population par département.
-    Avec courbe de tendance linéaire.
+    Scatter plot
     
     Parameters
     ----------
@@ -284,7 +220,7 @@ def correlation_densite_appartements(geo_stats_with_info):
     ------
     None
     """
-    # Visualisation 2 : Relation entre densité et type de logement
+    # Visuel : Relation entre densité et type de logement
     fig2 = px.scatter(geo_stats_with_info.dropna(subset=['densite']), 
                     x='densite', 
                     y='pct_appartement',
@@ -320,7 +256,7 @@ def carte_choropleth_departements_prix_m2(
     tiles='cartodbpositron'
     ):
     """
-    Crée une carte choropleth des départements colorés par prix moyen au m².
+    Crée une carte choropleth des départements par prix moyen (ou médian par déffaut) au m².
 
     Paramètres
     ----------
@@ -328,20 +264,18 @@ def carte_choropleth_departements_prix_m2(
         Données individuelles DVF, avec au minimum 'code_commune' et
         la colonne de valeur spécifiée par `value_col`.
     value_col : str
-        Nom de la colonne mesurant le prix/m² (par défaut le rapport
-        valeur foncière / surface bâtie).
+        Nom de la colonne mesurant le prix/m²
     agg : {'mean','median'}
-        Fonction d'agrégation pour obtenir la métrique par département.
+        Fonction d'agrégation pour obtenir par département.
     geojson_path : str
-        Chemin vers le GeoJSON des départements (doit contenir
-        properties.code pour le code département).
+        Chemin vers le GeoJSON des départements
     tiles : str
         Fond de carte Folium.
 
     Retour
     ------
     folium.Map
-        Carte choropleth Folium centrée sur la France.
+        Carte choropleth Folium
     """
     if value_col not in df_source.columns:
         raise KeyError(f"La colonne '{value_col}' est absente des données.")
@@ -399,22 +333,20 @@ def carte_choropleth_departements_surfaces(
     Paramètres
     ----------
     df_source : pd.DataFrame
-        Données individuelles DVF, avec au minimum 'code_commune' et
-        'surface_reelle_bati'.
+        Données individuelles DVF
     value_col : str
-        Nom de la colonne de surface (par défaut 'surface_reelle_bati').
+        Nom de la colonne de surface (par défaut 'surface_reelle_bati')
     agg : {'mean','median'}
-        Fonction d'agrégation pour obtenir la métrique par département.
+        Fonction d'agrégation pour obtenir par département.
     geojson_path : str
-        Chemin vers le GeoJSON des départements (doit contenir
-        properties.code pour le code département).
+        Chemin vers le GeoJSON des départements
     tiles : str
         Fond de carte Folium.
 
     Retour
     ------
     folium.Map
-        Carte choropleth Folium centrée sur la France.
+        Carte choropleth Folium
     """
     if value_col not in df_source.columns:
         raise KeyError(f"La colonne '{value_col}' est absente des données.")
