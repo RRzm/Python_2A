@@ -6,24 +6,24 @@
 
 ## Introduction
 
-Ce travail s'intéresse aux déterminants territoriaux de la demande immobilière en France, à travers l'analyse des variations spatiales du prix au mètre carré et du volume de transactions. Dans un contexte de fortes disparités géographiques, nous cherchons à comprendre comment certaines caractéristiques locales (développement humain, criminalité) influencent l'attractivité résidentielle des territoires.
+Ce travail s'intéresse aux déterminants territoriaux de la demande immobilière en France, à travers l'analyse des variations spatiales du prix au mètre carré et du volume de transactions. Dans un contexte de fortes disparités géographiques, nous cherchons à comprendre comment certaines caractéristiques locales influencent l'attractivité résidentielle dans les territoires.
 
-L'enjeu est de dépasser les approches macroéconomiques traditionnelles pour intégrer des variables reflétant plus directement la qualité de vie et l'environnement socio-économique à l'échelle communale et départementale. Nous testons l'hypothèse selon laquelle un niveau de développement humain élevé et un environnement plus sûr stimulent la demande immobilière, tandis qu'une criminalité élevée la freine.
 
 ## Méthode
 
-Notre analyse repose sur un croisement de plusieurs bases de données géolocalisées couvrant la quasi totalité du territoire français. Les données de transactions immobilières proviennent de la base DVF (Demandes de Valeurs Foncières), qui recense l'intégralité des ventes de biens immobiliers en France. 
+Notre analyse repose sur un croisement de plusieurs bases de données géolocalisées couvrant la quasi totalité du territoire français. Les données de transactions immobilières proviennent de la base DVF (Demandes de Valeurs Foncières), qui recense l'intégralité des ventes de biens immobiliers en France hormis certains départements particuliers qui n'utilisent pas ce dispositif.
 
-Le traitement des données implique plusieurs étapes : nettoyage et normalisation des adresses, agrégation géographique à l'échelle communale et départementale, calcul de statistiques descriptives (prix médian, nombre de transactions, taux de ventes par habitant), puis fusion des différentes sources sur la base de codes géographiques harmonisés.
+Le traitement des données implique plusieurs étapes : nettoyage et normalisations, agrégation géographique à l'échelle communale et départementale, calcul de statistiques descriptives (prix médian, nombre de transactions, etc), puis fusion des différentes sources sur la base de codes géographiques harmonisés (permattant ainsi de calculer par exemple le taux de ventes par habitant).
 
-L'analyse économétrique repose sur des régressions linéaires multiples (OLS).
+Les données nettoyées nous permettent ainsi d'analyser plus en détail les différentes relations entre les paramètres, et de confirmer des tendances intuitives (ou non).
+
+L'analyse économétrique proposée en fin de projet permet enfin d'apporter une modélisation du prix au mètre carré en utilisant quelques covariables illustrant une dynamique de vie (présence de médecins, salaires élevés, etc) ainsi que la densité de population dont le rôle a été explicité dans l'analyse des données. Cette enrichissement vise à compléter le rôle de la densité de population mis en évidence par l'analyse, même si des liens de corrélation existent entre les covariables choisies.
 
 ## Sources de données
 
 Notre travail mobilise plusieurs bases de données publiques :
 
 • Le fichier DVF du ministère de l'Économie et des Finances, qui constitue la référence nationale en matière de transactions immobilières (disponible sur data.gouv.fr), stocké sur SSP Cloud.
-
 • Les référentiels géographiques (codes communes, contours départementaux) fournis par l'INSEE et l'IGN, disponibles au format CSV dans le projet.
 
 Toutes ces données ont été récupérées au format CSV ou JSON, puis harmonisées pour permettre leur croisement géographique.
@@ -41,16 +41,14 @@ Le répertoire `scripts/` regroupe l'ensemble des fonctions utilisées et appel�
 • `do_ols.py` : modèles de régression
 • `global_variables.py` : variables globales utilisées dans le projet
 
-Le dossier `Données/` contient l'ensemble des fichiers CSV et GeoJSON utilisés.
+Le dossier `Données/` contient l'ensemble des fichiers CSV et GeoJSON utilisés, pour les données stockées dans le projet.
 
 Le fichier [`requirements.txt`](requirements.txt) liste les dépendances Python nécessaires à l'exécution du code (pandas, numpy, matplotlib, statsmodels, folium, etc).
 
 ## Reproductibilité
 
-Pour reproduire l'analyse dans son intégralité, il suffit d'installer les dépendances listées dans [`requirements.txt`](requirements.txt) puis d'exécuter séquentiellement les cellules du notebook [`main.ipynb`](main.ipynb).
+Pour reproduire l'analyse dans son intégralité, il suffit d'installer les dépendances listées dans [`requirements.txt`](requirements.txt) puis d'exécuter les cellules du notebook [`main.ipynb`](main.ipynb).
 
 Les scripts du dossier `scripts/` sont importés automatiquement par le notebook principal.
 
-## Principaux résultats
-
-A COMPLETER
+Certaines cartes graphiques dynamiques sont parfois lourdes ou non exécutées : elles ont été préalablement exécutées et téléchargées, et sont disponibles au format HTML dans le projet (fichiers html qui commencent par 'carte'). En cas de problème de visualisation, il suffit de les télécharger et de les ouvrir.
