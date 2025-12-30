@@ -40,8 +40,7 @@ def get_cloud_csv(filename, sep=","):
         df = pd.read_csv(
             f,
             sep=sep,
-            dtype={"code_commune": "str"},
-            low_memory=False
+            dtype={"code_commune": "str"}
         )
 
     return df
